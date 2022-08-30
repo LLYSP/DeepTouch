@@ -45,7 +45,7 @@ def show_cve_content(res):
 
 def saveData(datalist, savepath):
     book = xlwt.Workbook(encoding="utf-8", style_compression=0)  # 创建workbook对象
-    sheet = book.add_sheet('豆瓣电影Top250', cell_overwrite_ok=True)  # 创建工作表
+    sheet = book.add_sheet('aliyun_cve', cell_overwrite_ok=True)  # 创建工作表
     col = ("AVD编号", "漏洞名称", "漏洞类型", "披露时间", "漏洞评分")  # 第一行用于存放列名
 
     for i in range(0, 5):
