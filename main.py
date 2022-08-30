@@ -12,7 +12,7 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("请输入要扫描的主机地址，如：192.168.1.1")
         sys.exit()
-    host = sys.argv[2]  # 在终端输入ip
+    host = sys.argv[1]  # 在终端输入ip
 
     # 以下注释部分属于获取操作系统版本的nmap，还没调试完成
     # parser = OptionParser("Usage:%prog -i <target host> -n <network> or -t ttl_scan")  # 输出帮助信息
