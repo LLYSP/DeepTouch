@@ -37,3 +37,10 @@
 *   指纹识别算法的接口实现（用来计算版本）
 
 *   关联开放数据库
+## 测试用例
+*   现在如果想直接跑通的话，先只看main.py和scan_port.py，其余在开发中。
+*   ![image](https://user-images.githubusercontent.com/92193510/187325128-871f6c0f-f72e-41ac-9aaa-4b3631f4ea3c.png)
+*   ![image](https://user-images.githubusercontent.com/92193510/187325198-b87e3fc6-65be-451c-b3b9-37d62f3f306a.png)
+
+*   ![image](https://user-images.githubusercontent.com/92193510/187325164-7ae5706b-1873-4e04-ae00-87c63fa35d19.png)
+
