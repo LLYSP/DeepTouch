@@ -5,6 +5,10 @@ import socket
 import queue
 import threading
 
+import scan_host
+import scan_port
+import WebScanner.Scanner
+
 # import base64
 from optparse import OptionParser
 
@@ -48,7 +52,7 @@ class PortScanner(object):
                         # print(OPEN_MSG % port) # print不适合多线程
                         sys.stdout.write(OPEN_MSG % port)
 
-                        print("{+}" + ip + ":" + str(port) + ">" * 20 + find_service_name(port))
+                        print("{+}" + ip + ":" + str(port) + ">" * 20 + scan_port.find_service_name(port))
                     # else:
                     #     sys.stdout.write("% 6d [CLOSED]\n" % port)
                 except:
@@ -212,9 +216,11 @@ ________                    ___________                 .__
     python new_simple_scanner.py -i ip -p [port_scope|top_num] 
     python new_simple_scanner.py -u url -p [port_scope|top_num] 
     python new_simple_scanner.py -n network -p [port_scope|top_num] \n\n[Example]
+    python new_simple_scanner.py -w url
     python new_simple_scanner.py -i 127.0.0.1 -p 1000 
     python new_simple_scanner.py -u https://www.baidu.com -p 1-65535
     python new_simple_scanner.py -n 192.168.1.0/24 -p 1-1000 
+    python new_simple_scanner.py -w https://www.douban.com
 
 [Value]
     ip              0.0.0.0-255.255.255.255
@@ -228,47 +234,11 @@ ________                    ___________                 .__
 ip_list = []
 
 
-def find_service_name(port):  # 根据端口判断服务
-    return socket.getservbyport(port)
+# def find_service_name(port):  # 根据端口判断服务
+#     return socket.getservbyport(port)
 
 
-def scan_port(ip, port):
-    OPEN_MSG = "% 6d [OPEN]\n"
-    timeout = 5
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(timeout)
-        result_code = s.connect_ex((ip, port))  # 开放放回0
-        if result_code == 0:
-            # print(OPEN_MSG % port) # print不适合多线程
-            sys.stdout.write(ip+"     "+OPEN_MSG % port)
 
-            print("{+}" + ip + ":" + str(port) + ">" * 20 + find_service_name(port))
-        # else:
-        #     sys.stdout.write("% 6d [CLOSED]\n" % port)
-    except:
-        pass
-    finally:
-        s.close()
-
-
-def ttl_scan(ip):  # 探测ip
-    try:
-        packet = IP(dst=ip) / ICMP()
-        result = sr1(packet, timeout=1, verbose=0)
-        if result is None:
-            logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
-            pass
-
-        elif int(result[IP].ttl) <= 64:  # 判断目标主机响应包中TTL值是否小于等于64
-            print("%s  is Linux/Unix" % ip)  # 是的话就为linux/Unix
-            ip_list.append(ip)
-
-        else:
-            print("%s is Windows" % ip)  # 反之就是windows
-            ip_list.append(ip)
-    except:
-        pass
 
 
 def main():
@@ -299,8 +269,44 @@ def main():
                 split = port_scanner.split(args)
                 start_port = split[0]
                 end_port = split[1]
+                port_list = port_scanner.get_port_lists(start_port=start_port, end_port=end_port)
+                thread_num = (end_port - start_port) // 2
+                for port in port_list:
+                    port_queue.put(port)
+
+                for t in range(int(thread_num)):
+                    threads.append(port_scanner.PortScan(port_queue, ip, timeout=3))
+
+                print("[RESULT]\n")
+                # 启动线程
+                for thread in threads:
+                    thread.start()
+                # 阻塞线程
+                for thread in threads:
+                    thread.join()
+                end_time = time.time()  # 脚本结束执行的时间
+
+                print("[end time] %3ss" % (end_time - start_time,))
             else:
                 top = args[4]
+                port_list = port_scanner.get_port_lists(top=top)  # 根据参数获取总端口list
+                thread_num = int(top) // 2
+                for port in port_list:
+                    port_queue.put(port)
+
+                for t in range(int(thread_num)):
+                    threads.append(port_scanner.PortScan(port_queue, ip, timeout=3))
+
+                print("[RESULT]\n")
+                # 启动线程
+                for thread in threads:
+                    thread.start()
+                # 阻塞线程
+                for thread in threads:
+                    thread.join()
+                end_time = time.time()  # 脚本结束执行的时间
+
+                print("[end time] %3ss" % (end_time - start_time,))
 
         elif args[1] == "-u" and args[3] == "-p":
             ip = port_scanner.get_ip_by_name(args[2])
@@ -309,8 +315,45 @@ def main():
                 split = port_scanner.split(args)
                 start_port = split[0]
                 end_port = split[1]
+                port_list = port_scanner.get_port_lists(start_port=start_port, end_port=end_port)
+                thread_num = (end_port - start_port) // 2
+                for port in port_list:
+                    port_queue.put(port)
+
+                for t in range(int(thread_num)):
+                    threads.append(port_scanner.PortScan(port_queue, ip, timeout=3))
+
+                print("[RESULT]\n")
+                # 启动线程
+                for thread in threads:
+                    thread.start()
+                # 阻塞线程
+                for thread in threads:
+                    thread.join()
+                end_time = time.time()  # 脚本结束执行的时间
+
+                print("[end time] %3ss" % (end_time - start_time,))
             else:
                 top = args[4]
+                port_list = port_scanner.get_port_lists(top=top)  # 根据参数获取总端口list
+                thread_num = int(top) // 2
+                for port in port_list:
+                    port_queue.put(port)
+
+                for t in range(int(thread_num)):
+                    threads.append(port_scanner.PortScan(port_queue, ip, timeout=3))
+
+                print("[RESULT]\n")
+                # 启动线程
+                for thread in threads:
+                    thread.start()
+                # 阻塞线程
+                for thread in threads:
+                    thread.join()
+                end_time = time.time()  # 脚本结束执行的时间
+
+                print("[end time] %3ss" % (end_time - start_time,))
+
         elif args[1] == "-n" and args[3] == "-p":
             Network = args[2]
             thread_list = []
@@ -320,7 +363,7 @@ def main():
             # 先扫描有哪些ip可以开放
             for i in range(1, 255):
                 ip = prefix + str(i)
-                t = threading.Thread(target=ttl_scan, args=(ip,))
+                t = threading.Thread(target=scan_host.ttl_scan, args=(ip,ip_list))
                 t.start()
                 time.sleep(0.1)
 
@@ -330,49 +373,54 @@ def main():
                     start_port = split[0]
                     end_port = split[1]
                     for port in range(start_port, end_port):
-                        t1 = threading.Thread(target=scan_port, args=(host, port))
+                        t1 = threading.Thread(target=scan_port.scan_port, args=(host, port))
                         t1.start()
 
                 else:
                     top = args[4]
                     for port in range(1, top+1):
-                        t1 = threading.Thread(target=scan_port, args=(host, port))
+                        t1 = threading.Thread(target=scan_host.ttl_scan(), args=(host, port))
                         t1.start()
                         thread_list.append(t1)
             pass
+
         else:
             sys.exit(1)
+    elif len(args)==3:
+        # ['portscaner_v3.py', '-w', 'url']
+        if args[1]=="-w":
+            WebScanner.Scanner.Scanner(str(args[2]))
     else:
         help = port_scanner.help()
         print(help)
         sys.exit(1)
 
-    # print("ip:%s,top:%s,start_port:%s,end_port:%s,thread_num:%s"%(ip,type(top),type(start_port),type(end_port),type(thread_num)))
 
-    if top is not None:
-        port_list = port_scanner.get_port_lists(top=top)  # 根据参数获取总端口list
-        thread_num = int(top) // 2
 
-    else:
-        port_list = port_scanner.get_port_lists(start_port=start_port, end_port=end_port)
-        thread_num = (end_port - start_port) // 2
-
-    for port in port_list:
-        port_queue.put(port)
-
-    for t in range(int(thread_num)):
-        threads.append(port_scanner.PortScan(port_queue, ip, timeout=3))
-
-    print("[RESULT]\n")
-    # 启动线程
-    for thread in threads:
-        thread.start()
-    # 阻塞线程
-    for thread in threads:
-        thread.join()
-    end_time = time.time()  # 脚本结束执行的时间
-
-    print("[end time] %3ss" % (end_time - start_time,))
+    # if top is not None:
+    #     port_list = port_scanner.get_port_lists(top=top)  # 根据参数获取总端口list
+    #     thread_num = int(top) // 2
+    #
+    # else:
+    #     port_list = port_scanner.get_port_lists(start_port=start_port, end_port=end_port)
+    #     thread_num = (end_port - start_port) // 2
+    #
+    # for port in port_list:
+    #     port_queue.put(port)
+    #
+    # for t in range(int(thread_num)):
+    #     threads.append(port_scanner.PortScan(port_queue, ip, timeout=3))
+    #
+    # print("[RESULT]\n")
+    # # 启动线程
+    # for thread in threads:
+    #     thread.start()
+    # # 阻塞线程
+    # for thread in threads:
+    #     thread.join()
+    # end_time = time.time()  # 脚本结束执行的时间
+    #
+    # print("[end time] %3ss" % (end_time - start_time,))
 
 
 if __name__ == '__main__':
