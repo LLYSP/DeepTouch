@@ -14,15 +14,15 @@ from WebScanner.server import serverClass
 from WebScanner.system import systemClasses
 from WebScanner.waf import wafClasses
 
-urllist = [
-    "https://www.douban.com/",
-    "https://www.baidu.com/",
-    "https://blog.csdn.net/",
-    "https://qa.1r1g.com/sf/ask/222752841/",
-    "https://www.cnblogs.com/zpchcbd/p/15810575.html",
-    # "https://github.com/EternalMemory672/smap",
-    "https://baike.baidu.com/"
-]
+# urllist = [
+#     "https://www.douban.com/",
+#     "https://www.baidu.com/",
+#     "https://blog.csdn.net/",
+#     "https://qa.1r1g.com/sf/ask/222752841/",
+#     "https://www.cnblogs.com/zpchcbd/p/15810575.html",
+#     # "https://github.com/EternalMemory672/smap",
+#     "https://baike.baidu.com/"
+# ]
 
 
 def returnHtml(url):
@@ -35,7 +35,6 @@ def returnHtml(url):
     try:
         response = urllib.request.urlopen(req)
         html = response.read().decode("utf-8")
-        # print(html)
     except urllib.error.URLError as e:
         if hasattr(e, "code"):
             print(e.code)
@@ -254,42 +253,40 @@ def wafFinger(content, header):
     return "\'\'"
 
 
-def Scanner():
-    for url in urllist:
-        content, header = getResponse(url)
-        print("targe_url:" + url)
-        print("=" * 10 + "Scanner Start" + "=" * 10)
+def Scanner(url):
+    content, header = getResponse(url)
+    print("targe_url:" + url)
+    print("=" * 10 + "Scanner Start" + "=" * 10)
 
-        cms = cmsFinger(content, header)
-        # if cms != "":
-        print("cms\t\t\t" + ">" * 10 + "\t" + cms)
+    cms = cmsFinger(content, header)
+    # if cms != "":
+    print("cms\t\t\t" + ">" * 10 + "\t" + cms)
 
-        frame = frameFinger(content, header)
-        # if frame != "":
-        print("frame\t\t" + ">" * 10 + "\t" + frame)
+    frame = frameFinger(content, header)
+    # if frame != "":
+    print("frame\t\t" + ">" * 10 + "\t" + frame)
 
-        frontend = frontendFinger(content, header)
-        # if frontend != "":
-        print("frontend\t" + ">" * 10 + "\t" + frontend)
+    frontend = frontendFinger(content, header)
+    # if frontend != "":
+    print("frontend\t" + ">" * 10 + "\t" + frontend)
 
-        language = languageFinger(content, header)
-        # if language != "":
-        print("language\t" + ">" * 10 + "\t" + language)
+    language = languageFinger(content, header)
+    # if language != "":
+    print("language\t" + ">" * 10 + "\t" + language)
 
-        server = serverFinger(content, header)
-        # if server != "":
-        print("server\t\t" + ">" * 10 + "\t" + server)
+    server = serverFinger(content, header)
+    # if server != "":
+    print("server\t\t" + ">" * 10 + "\t" + server)
 
-        system = systemFinger(content, header)
-        # if system != "":
-        print("system\t\t" + ">" * 10 + "\t" + system)
+    system = systemFinger(content, header)
+    # if system != "":
+    print("system\t\t" + ">" * 10 + "\t" + system)
 
-        waf = wafFinger(content, header)
-        # if waf != "":
-        print("waf\t\t\t" + ">" * 10 + "\t" + waf)
+    waf = wafFinger(content, header)
+    # if waf != "":
+    print("waf\t\t\t" + ">" * 10 + "\t" + waf)
 
-        print()
+    print()
 
 
-if __name__ == '__main__':
-    Scanner()
+
