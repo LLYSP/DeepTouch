@@ -19,7 +19,7 @@ urllist = [
     "https://www.baidu.com/",
     "https://blog.csdn.net/",
     "https://qa.1r1g.com/sf/ask/222752841/",
-    # "https://www.cnblogs.com/zpchcbd/p/15810575.html",
+    "https://www.cnblogs.com/zpchcbd/p/15810575.html",
     # "https://github.com/EternalMemory672/smap",
     "https://baike.baidu.com/"
 ]
@@ -45,7 +45,11 @@ def returnHtml(url):
 
 
 def returnHeader(url):
-    header = requests.post(url).headers  # 获取网页
+    head = {  # 模拟浏览器头部信息，向豆瓣发送消息
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36 Edg/99.0.1150.30"
+    }
+
+    header = requests.post(url, headers=head).headers  # 获取网页
     return header
 
 
