@@ -8,12 +8,15 @@ import threading
 import scan_host
 import scan_port
 import WebScanner.Scanner
+import draw_topology
 
 # import base64
 from optparse import OptionParser
 
 from scapy.layers.inet import IP, ICMP
 from scapy.sendrecv import sr1
+
+from ServiceScanner import Service_Scan
 
 
 class PortScanner(object):
@@ -50,12 +53,29 @@ class PortScanner(object):
                     result_code = s.connect_ex((ip, port))  # 开放放回0
                     if result_code == 0:
                         # print(OPEN_MSG % port) # print不适合多线程
-                        sys.stdout.write(OPEN_MSG % port)
+                        # sys.stdout.write(OPEN_MSG % port)
+                        # print("{+}" + ip + ":" + str(port) + ">" * 20)
+                        res_deep = Service_Scan.Service_Scan(ip, port)
+                        if len(res_deep) > 0:
+                            print(str(res_deep))
+                        else:
+                            print("[+]On port " + str(port) + "\nService: " + find_service_name(port))
 
-                        print("{+}" + ip + ":" + str(port) + ">" * 20 + scan_port.find_service_name(port))
+
+
+                        # if Service_Scan.Service_Scan(ip, port) != None:
+                        #     print("test")
+                        #
+                        # elif find_service_name(port) != None:
+                        #     print("test222")
+                        #     print("{+}" + ip + ":" + str(port) + ">" * 20 + str(find_service_name(port)))
+                        # else:
+                        #     print("test333")
+                        #     print("{+}" + ip + ":" + str(port) + ">" * 20)
                     # else:
                     #     sys.stdout.write("% 6d [CLOSED]\n" % port)
-                except:
+                except Exception as e:
+                    print(e)
                     pass
                 finally:
                     s.close()
@@ -215,11 +235,13 @@ ________                    ___________                 .__
 [Usage]
     python new_simple_scanner.py -i ip -p [port_scope|top_num] 
     python new_simple_scanner.py -u url -p [port_scope|top_num] 
-    python new_simple_scanner.py -n network -p [port_scope|top_num] \n\n[Example]
-    python new_simple_scanner.py -w url
+    python new_simple_scanner.py -n network --os 
+    python new_simple_scanner.py -n network --draw
+    python new_simple_scanner.py -w url  \n\n[Example]
     python new_simple_scanner.py -i 127.0.0.1 -p 1000 
     python new_simple_scanner.py -u https://www.baidu.com -p 1-65535
-    python new_simple_scanner.py -n 192.168.1.0/24 -p 1-1000 
+    python new_simple_scanner.py -n 192.168.1.0/24 --os
+    python new_simple_scanner.py -n 192.168.1.0/24 --draw
     python new_simple_scanner.py -w https://www.douban.com
 
 [Value]
@@ -234,11 +256,8 @@ ________                    ___________                 .__
 ip_list = []
 
 
-# def find_service_name(port):  # 根据端口判断服务
-#     return socket.getservbyport(port)
-
-
-
+def find_service_name(port):  # 根据端口判断服务
+    return socket.getservbyport(port)
 
 
 def main():
@@ -354,48 +373,55 @@ def main():
 
                 print("[end time] %3ss" % (end_time - start_time,))
 
-        elif args[1] == "-n" and args[3] == "-p":
+        else:
+            sys.exit(1)
+    elif len(args) == 3 and args[1] == '-w':
+        # ['portscaner_v3.py', '-w', 'url']
+        WebScanner.Scanner.Scanner(str(args[2]))
+
+    elif len(args) == 4 and args[1] == '-n':
+        if args[3] == '--os':
             Network = args[2]
-            thread_list = []
-            prefix = Network.split(".")[0] + '.' + Network.split(".")[1] + '.' + Network.split(".")[
-                2] + '.'  # 以点为分割提取ip
+            prefix = Network.split(".")[0] + '.' + Network.split(".")[1] + '.' + Network.split(".")[2] + '.'  # 以点为分割提取ip
             # 地址前三位
             # 先扫描有哪些ip可以开放
             for i in range(1, 255):
                 ip = prefix + str(i)
-                t = threading.Thread(target=scan_host.ttl_scan, args=(ip,ip_list))
+                t = threading.Thread(target=scan_host.ttl_scan, args=(ip, ip_list))
                 t.start()
                 time.sleep(0.1)
 
-            for host in ip_list:
-                if args[4].find("-") != -1:
-                    split = port_scanner.split(args)
-                    start_port = split[0]
-                    end_port = split[1]
-                    for port in range(start_port, end_port):
-                        t1 = threading.Thread(target=scan_port.scan_port, args=(host, port))
-                        t1.start()
+        elif args[3] == '--draw':
+            # ['portscaner_v3.py', '-n', 'network', '--draw']
+            Network = args[2]
+            prefix = Network.split(".")[0] + '.' + Network.split(".")[1] + '.' + Network.split(".")[2] + '.'  # 以点为分割提取ip
+            # 地址前三位
+            # 先扫描有哪些ip可以开放
+            for i in range(1, 255):
+                ip = prefix + str(i)
+                t = threading.Thread(target=scan_host.ttl_scan_noshow, args=(ip, ip_list))
+                t.start()
+                time.sleep(0.1)
+            print(ip_list)
 
-                else:
-                    top = args[4]
-                    for port in range(1, top+1):
-                        t1 = threading.Thread(target=scan_host.ttl_scan(), args=(host, port))
-                        t1.start()
-                        thread_list.append(t1)
-            pass
+            host_ip = draw_topology.get_host_ip()
+            iplist_list = []
+            for i in range(0, len(ip_list)):
+                res = "./temp/route" + str(i) + ".txt"
+                url = ip_list[i]
+                print(res)
+                # draw_topology.getIp2TXT(url, res)
 
-        else:
-            sys.exit(1)
-    elif len(args)==3:
-        # ['portscaner_v3.py', '-w', 'url']
-        if args[1]=="-w":
-            WebScanner.Scanner.Scanner(str(args[2]))
+                iplist = draw_topology.generateIpList(res)
+                print(iplist)
+                if len(iplist) >= 2:
+                    iplist_list.append(iplist)
+
+            draw_topology.drawPic(host_ip, iplist_list)
     else:
         help = port_scanner.help()
         print(help)
         sys.exit(1)
-
-
 
     # if top is not None:
     #     port_list = port_scanner.get_port_lists(top=top)  # 根据参数获取总端口list
