@@ -3,6 +3,7 @@ class FrontendClasses():
     def __init__(self,content,header):
         self.content = content
         self.header = str(header)
+
     def Angularjs(self):
         _ = False
         _ = re.search(r'ng-app', self.content, re.I) is not None

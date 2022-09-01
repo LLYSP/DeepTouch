@@ -6,16 +6,22 @@
 import requests
 import urllib.request, urllib.error  # 指定URL，获取网页数据
 
+from WebScanner.cms import cmsClasses
 from WebScanner.frame import frameClasses
 from WebScanner.frontend import frontedClasses
 from WebScanner.language import languageClasses
 from WebScanner.server import serverClass
 
-url = "https://www.douban.com/"
-# url = "https://www.baidu.com/"
-# url = "https://blog.csdn.net/"
-# url = "https://qa.1r1g.com/sf/ask/222752841/"
-# url = "https://www.cnblogs.com/zpchcbd/p/15810575.html"
+urllist=[
+    "https://www.douban.com/",
+    "https://www.baidu.com/",
+    "https://blog.csdn.net/",
+    "https://qa.1r1g.com/sf/ask/222752841/",
+    "https://www.cnblogs.com/zpchcbd/p/15810575.html",
+    "https://github.com/EternalMemory672/smap",
+    "https://baike.baidu.com/"
+]
+
 
 def returnHtml(url):
     head = {  # 模拟浏览器头部信息，向豆瓣发送消息
@@ -47,11 +53,21 @@ def getResponse(url):
     # print("==="*20)
     header = returnHeader(url)
     # print(header)
-    return html,header
-
-
-# def frameFinger(content):#框架的正则匹配
+    return html,header# def frameFinger(content):#框架的正则匹配
 #     #使用接收到的content，调用用于多种框架的py文件，分别用于正则匹配。
+
+
+def cmsFinger(content,header):  # 前端的正则匹配
+    classes = cmsClasses.CmsClasses(content,header)
+    if classes.Drupal() is not None:
+        return classes.Drupal()
+    if classes.Joomla() is not None:
+        return classes.Joomla()
+    if classes.Magento() is not None:
+        return classes.Magento()
+    if classes.Wordpress() is not None:
+        return classes.Wordpress()
+    return "Don`t know"
 
 def frontendFinger(content,header):  # 前端的正则匹配
     classes = frontedClasses.FrontendClasses(content,header)
@@ -73,12 +89,14 @@ def frontendFinger(content,header):  # 前端的正则匹配
         return classes.Reactjs()
     if classes.Vuejs() is not None:
         return classes.Vuejs()
-
+    return "Don`t know"
 
 def serverFinger(content,header):  # 服务的正则匹配
     serverFinder = serverClass.ServerClass(content, header)
     server = serverFinder.findServer()
-    return server
+    if server is not None:
+        return server
+    return "Don`t know"
 
 def languageFinger(content,header):  # 编程语言的正则匹配
     classes = languageClasses.LanguageClasses(content,header)
@@ -131,19 +149,30 @@ def frameFinger(content,header):  # 框架的正则匹配
     return "Don`t know"
 
 def Scanner():
+    for url in urllist:
+        content,header = getResponse(url)
+        print("targe_url:"+url)
+        print("="*10+"Scanner Start"+"="*10)
 
-    content,header = getResponse(url)
-    print("targe_url:"+url)
-    print("="*10+"Scanner Start"+"="*10)
-    frame = frameFinger(content,header)
-    print("frame"+">"*10+frame)
-    frontend = frontendFinger(content,header)
-    print("frontend"+">"*10+frontend)
-    language = languageFinger(content,header)
-    print("language" + ">" * 10 + language)
-    server = serverFinger(content,header)
-    print("server"+">"*10+server)
+        frame = frameFinger(content,header)
+        if frame!="Don`t know":
+            print("frame"+">"*10+frame)
 
+        frontend = frontendFinger(content,header)
+        if frontend!="Don`t know":
+            print("frontend"+">"*10+frontend)
+
+        language = languageFinger(content,header)
+        if language!="Don`t know":
+            print("language" + ">" * 10 + language)
+
+        server = serverFinger(content,header)
+        if server!="Don`t know":
+            print("server"+">"*10+server)
+
+        cms = cmsFinger(content,header)
+        if cms!="Don`t know":
+            print("cms"+">"*10+cms)
 
 if __name__ == '__main__':
     Scanner()

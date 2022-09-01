@@ -4,7 +4,6 @@ class LanguageClasses():
         self.content = content
         self.header = str(header)
 
-    
     def Asp(self):
         header_dictionary = eval(self.header)
         _ = False
@@ -17,6 +16,7 @@ class LanguageClasses():
             if _:
                 return "ASP.NET"
         return None
+
     def Java(self):
         header_dictionary = eval(self.header)
         _ = False

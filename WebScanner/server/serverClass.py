@@ -5,9 +5,9 @@ class ServerClass():
         self.header = str(header)
 
     def findServer(self):
-        server="NULL"
         header_dictionary = eval(self.header)
         for item in header_dictionary.items():
             if re.search(r'server', item[0], re.I):
                 server = item[1]
-        return server
+                return server
+        return None

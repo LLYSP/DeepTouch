@@ -1,7 +1,4 @@
-import re
-
-
-class Cakephp():
+import reclass Cakephp():
     def process(self, headers, content):
         _ = False
         for item in headers.items():
