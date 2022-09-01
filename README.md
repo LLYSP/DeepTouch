@@ -14,6 +14,8 @@ python写的很菜，仅供参考
 ### 运行
 进入项目并启动 `deeptouch.py` 即可：  
 `py deeptouch.py`或`python deeptouch.py`    
+![image](https://user-images.githubusercontent.com/92193510/187977294-4d54d7da-ca30-403f-968e-31c927a38320.png)
+
 
 ### tips
 本程序全程采用python语言进行编译,需要python3环境方能成功运行。   
