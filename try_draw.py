@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
         iplist = generateIpList(res)
         print(iplist)
-        if len(iplist)>2:
+        if len(iplist)>=2:
             iplist_list.append(iplist)
 
     drawPic(host_ip, iplist_list)

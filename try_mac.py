@@ -42,9 +42,38 @@ class IP2MAC:
 
         return result.group() if result else None
 
+class MAC2Device:
+    def sliceMac(self,mac):
+        mac_measurable = mac.replace('-','')[0:6]
+        # print(mac_measurable)
+        return mac_measurable
+
+    def match_device(self,mac_measurable,res):
+        file = open(res,encoding='UTF-8')
+        for line in file.readlines():
+            curLine = line.strip()
+            Registry,Assignment,Organization_info = curLine.split(',',2)
+            if Assignment == mac_measurable.upper():
+                return Organization_info
+        return "Not Found"
 
 if __name__ == '__main__':
-    g = IP2MAC()
-    print(g.getMac('10.122.217.31'))#直接在这里进行input就行
+    iplist = [
+        "10.122.192.1",
+        "10.122.203.46",
+        "10.122.203.193"
+    ]
+    msg_list = []
+    for ip in iplist:
+        g = IP2MAC()
+        mac = g.getMac(ip)
+
+        if mac != '00-00-00-00-00-00':
+            mac_tool = MAC2Device()
+            mac_measurable = mac_tool.sliceMac(mac)
+            res = "./device.txt"
+            info = mac_tool.match_device(mac_measurable,res)
+            msg_list.append([ip,mac,info])
+    print(msg_list)
 
 
